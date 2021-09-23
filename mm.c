@@ -62,6 +62,13 @@ static size_t align(size_t x)
 bool mm_init(void)
 {
     /* IMPLEMENT THIS */
+    int mem_size = 100;
+ 
+    int *heap = malloc(mem_size);
+    // memory was not allocated
+    if (heap == NULL) {
+        return false;
+    }
     return true;
 }
 
@@ -80,6 +87,10 @@ void* malloc(size_t size)
 void free(void* ptr)
 {
     /* IMPLEMENT THIS */
+    // this should do nothing if ptr has a value of NULL
+    if (ptr == NULL) {
+        return;
+    }
     return;
 }
 
