@@ -1,7 +1,11 @@
 /*
  * mm.c
  *
+<<<<<<< HEAD
  * Name: Ryan Hayes and Ben Song
+=======
+ * Name: Ben Song
+>>>>>>> 24849b257f8206bc1111ff5b846167ba0b14836b
  *
  * NOTE TO STUDENTS: Replace this header comment with your own header
  * comment that gives a high level description of your solution.
@@ -56,6 +60,9 @@ static size_t align(size_t x)
     return ALIGNMENT * ((x+ALIGNMENT-1)/ALIGNMENT);
 }
 
+/* Global Variables */
+
+
 /*
  * Initialize: returns false on error, true on success.
  */
@@ -109,6 +116,37 @@ void free(void* ptr)
 void* realloc(void* oldptr, size_t size)
 {
     /* IMPLEMENT THIS */
+    void *ptr;
+
+    if (oldptr == NULL) {
+        ptr = malloc(size);
+        // Check to make sure malloc was successful 
+        if (ptr == NULL) {
+            return NULL;
+        }
+        return ptr;
+    }
+    else if (size == 0) {
+        free(oldptr);
+        return NULL;
+    }
+    else {
+        if (oldptr && (size > 16)) {
+            ptr = malloc(size);
+        }
+        else {
+            mem_memcpy(ptr, oldptr, size);
+            free(oldptr);
+            return ptr;
+        }
+        // if malloc was sucessful copy contents to new ptr
+        if (ptr) {
+            mem_memcpy(ptr, oldptr, size);
+            free(oldptr);
+        }
+        return ptr;
+    }
+    
     return NULL;
 }
 
