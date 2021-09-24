@@ -1,7 +1,7 @@
 /*
  * mm.c
  *
- * Name: [FILL IN]
+ * Name: Ryan Hayes and Ben Song
  *
  * NOTE TO STUDENTS: Replace this header comment with your own header
  * comment that gives a high level description of your solution.
@@ -78,6 +78,16 @@ bool mm_init(void)
 void* malloc(size_t size)
 {
     /* IMPLEMENT THIS */
+    if (size == 0) {
+        return NULL
+    }
+        
+    if (size > mem_size) {
+        mem_sbrk(size-mem_size)
+
+    }
+    print(mem_brk)
+
     return NULL;
 }
 
