@@ -82,11 +82,10 @@ void* malloc(size_t size)
         return NULL
     }
         
-    if (size > mem_size) {
-        mem_sbrk(size-mem_size)
-
+    if (size + mem_brk > mem_max_addr) {
+        return NULL
     }
-    print(mem_brk)
+    
 
     return NULL;
 }
