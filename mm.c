@@ -102,39 +102,31 @@ void free(void* ptr)
  */
 void* realloc(void* oldptr, size_t size)
 {
-    /* IMPLEMENT THIS */
-    void *ptr;
-
+    // when oldptr is null, it is equivalent to malloc(size)
     if (oldptr == NULL) {
-        ptr = malloc(size);
-        // Check to make sure malloc was successful 
-        if (ptr == NULL) {
-            return NULL;
-        }
-        return ptr;
+        return malloc(size);
     }
+    // when size is 0, it is equivalent to free(oldptr)
     else if (size == 0) {
         free(oldptr);
         return NULL;
     }
+    // if size is less than the old block then we will just be retuning the contents of the oldptr
+    else if (size <= 16)
+    {
+        return oldptr;
+    }
+    /* when oldptr is not null and the size is greater than the block size we 
+    initilize a new ptr that will have a block size of size and we then copy the contents
+    of the oldptr into the new ptr and return the new ptr*/
     else {
-        if (oldptr && (size > 16)) {
-            ptr = malloc(size);
-        }
-        else {
-            mem_memcpy(ptr, oldptr, size);
-            free(oldptr);
-            return ptr;
-        }
-        // if malloc was sucessful copy contents to new ptr
-        if (ptr) {
-            mem_memcpy(ptr, oldptr, size);
-            free(oldptr);
+        void *ptr = malloc(size);
+        if (ptr != NULL) {
+            mem_memcpy(ptr, oldptr, 16);
+            free(ptr);
         }
         return ptr;
     }
-    
-    return NULL;
 }
 
 /*
