@@ -1,7 +1,7 @@
 /*
  * mm.c
  *
- * Name: [FILL IN]
+ * Name: Ben Song
  *
  * NOTE TO STUDENTS: Replace this header comment with your own header
  * comment that gives a high level description of your solution.
@@ -56,6 +56,9 @@ static size_t align(size_t x)
     return ALIGNMENT * ((x+ALIGNMENT-1)/ALIGNMENT);
 }
 
+/* Global Variables */
+
+
 /*
  * Initialize: returns false on error, true on success.
  */
@@ -99,8 +102,31 @@ void free(void* ptr)
  */
 void* realloc(void* oldptr, size_t size)
 {
-    /* IMPLEMENT THIS */
-    return NULL;
+    // when oldptr is null, it is equivalent to malloc(size)
+    if (oldptr == NULL) {
+        return malloc(size);
+    }
+    // when size is 0, it is equivalent to free(oldptr)
+    else if (size == 0) {
+        free(oldptr);
+        return NULL;
+    }
+    // if size is less than the old block then we will just be retuning the contents of the oldptr
+    else if (size <= 16)
+    {
+        return oldptr;
+    }
+    /* when oldptr is not null and the size is greater than the block size we 
+    initilize a new ptr that will have a block size of size and we then copy the contents
+    of the oldptr into the new ptr and return the new ptr*/
+    else {
+        void *ptr = malloc(size);
+        if (ptr != NULL) {
+            mem_memcpy(ptr, oldptr, 16);
+            free(ptr);
+        }
+        return ptr;
+    }
 }
 
 /*
