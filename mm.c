@@ -1,7 +1,11 @@
 /*
  * mm.c
  *
+<<<<<<< HEAD
+ * Name: Ryan Hayes and Ben Song
+=======
  * Name: Ben Song
+>>>>>>> 24849b257f8206bc1111ff5b846167ba0b14836b
  *
  * NOTE TO STUDENTS: Replace this header comment with your own header
  * comment that gives a high level description of your solution.
@@ -58,6 +62,11 @@ static size_t align(size_t x)
 
 /* Global Variables */
 
+struct header {
+    size_t size;
+    struct header *next_block;
+    struct header *prev_block;
+}
 
 /*
  * Initialize: returns false on error, true on success.
@@ -65,14 +74,21 @@ static size_t align(size_t x)
 bool mm_init(void)
 {
     /* IMPLEMENT THIS */
-    int mem_size = 100;
- 
-    int *heap = malloc(mem_size);
-    // memory was not allocated
-    if (heap == NULL) {
-        return false;
-    }
+    struct header *ptr = mem_sbrk(16);
+    ptr->next_block = p;
+    ptr->prev_block = p;
     return true;
+}
+/*
+* Free block function obtained from slide 34 of Lectures 5+6
+*/
+void free_block(size_t *p) {
+    *p = *p & -2;
+    next = (size_t *) ((char *)p + *p);
+    if ((*next & 1) == 0) {
+        *p = *p + *next;
+    }
+    return;
 }
 
 /*
@@ -80,8 +96,19 @@ bool mm_init(void)
  */
 void* malloc(size_t size)
 {
+
+    uint32_t *header = 1;
+    void *ptr 
+
+
     /* IMPLEMENT THIS */
-    return NULL;
+    if (size == 0) {
+        return NULL;
+    }
+    size += sizeof(header);
+
+    *ptr = mem_sbrk(size);
+    return *ptr;
 }
 
 /*
@@ -94,6 +121,8 @@ void free(void* ptr)
     if (ptr == NULL) {
         return;
     }
+
+
     return;
 }
 
