@@ -61,6 +61,7 @@ static size_t align(size_t x)
 }
 
 /* Global Variables */
+void* find_open_block(size_t size);
 
 struct header {
     size_t size;
@@ -80,32 +81,39 @@ bool mm_init(void)
     ptr->prev_block = ptr;
     return true;
 }
-/*
- Free block function obtained from slide 34 of Lectures 5+6
-void free_block(size_t *p) {
-    *p = *p & -2;
-    (size_t *)next = (size_t *) ((char *)p + *p);
-    if ((*next & 1) == 0) {
-        *p = *p + *next;
-    }
-    return;
-}
-*/ 
+
 /*
  * malloc
  */
 void* malloc(size_t size)
 {
     /* IMPLEMENT THIS */
-    //size_t new_size = align(size + 16);
     if (size == 0) {
         return NULL;
     }
-    /*
-    *ptr = mem_sbrk(size);
-    return *ptr;
-    */
+    size_t new_size = align(size + 16);
+    struct header *ptr= find_open_block(new_size);
+    if ((long)ptr == -1) {
+        return NULL;
+    }
+    else {
+        *(size_t *)ptr = size;
+        return (void *)(ptr + 16);
+    }
    return NULL;
+}
+
+void* find_open_block(size_t size) {
+    struct header *ptr = mem_heap_lo();
+    while(ptr != ((struct header *)mem_heap_lo())->next_block && ptr->size < size) {
+        ptr = ptr->next_block;
+    }
+    if (ptr != mem_heap_lo()) {
+        return ptr;
+    }
+    else {
+        return NULL;
+    }
 }
 
 /*
