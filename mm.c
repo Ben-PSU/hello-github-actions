@@ -88,10 +88,21 @@ void* malloc(size_t size)
     if (size == 0) {
         return NULL
     }
-        
-    if (size + mem_brk > mem_max_addr) {
+
+    uint32_t header = 1
+    uint32_t footer = 1
+
+   
+
+    size += sizeof(header)
+    size += sizeof(footer)
+
+     if (size + mem_brk > mem_max_addr) {
         return NULL
     }
+
+    
+
     
 
     return NULL;
@@ -107,6 +118,8 @@ void free(void* ptr)
     if (ptr == NULL) {
         return;
     }
+
+
     return;
 }
 
