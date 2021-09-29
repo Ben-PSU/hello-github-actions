@@ -87,12 +87,16 @@ bool mm_init(void)
  */
 void* malloc(size_t size)
 {
+    
     /* IMPLEMENT THIS */
+    
     if (size == 0) {
         return NULL;
     }
     size_t new_size = align(size + 16);
     struct header *ptr= find_open_block(new_size);
+    printf("Stuck");
+
     if ((long)ptr == -1) {
         return NULL;
     }
@@ -100,14 +104,16 @@ void* malloc(size_t size)
         *(size_t *)ptr = size;
         return (void *)(ptr + 16);
     }
-   return NULL;
 }
 
 void* find_open_block(size_t size) {
     struct header *ptr = mem_heap_lo();
+    // This loop is not currently working because it is not effectively changing the value of the pointer. 
+    // Since the pointer is equal to mem_heap_lo, it is returning a NULL pointer which does not allow the execution of the else statement in malloc.
     while(ptr != ((struct header *)mem_heap_lo())->next_block && ptr->size < size) {
         ptr = ptr->next_block;
     }
+
     if (ptr != mem_heap_lo()) {
         return ptr;
     }
