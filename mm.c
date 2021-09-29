@@ -85,21 +85,21 @@ bool mm_init(void)
 void* malloc(size_t size)
 {
 
-    uint32_t header = 1
-    uint32_t footer = 1
-    void *ptr 
+    uint32_t header = 1;
+    uint32_t footer = 1;
+    void *ptr;
 
     /* IMPLEMENT THIS */
     if (size == 0) {
-        return NULL
+        return NULL;
     }
 
 
-    size += sizeof(header)
-    size += sizeof(footer)
+    size += sizeof(header);
+    size += sizeof(footer);
 
-     if (size + mem_brk > mem_max_addr) {
-        return NULL
+     if (size + mem_sbrk) {
+        return NULL;
     }
    
 
@@ -112,11 +112,19 @@ void* malloc(size_t size)
 void free(void* ptr)
 {
     /* IMPLEMENT THIS */
-    // this should do nothing if ptr has a value of NULL
-    if (ptr == NULL) {
+    if (ptr == NULL){
         return;
     }
-
+    size_t *header = (char *)ptr - header_size;
+    *header = *header & ~1L; // ~1L means that this is a Long type
+    // // clear the allocated block
+    // size_t *p = ptr;
+    // *p = *p & -2;
+    // // check for the next block and add to block if not already allocated
+    // int *next = (size_t *)((char *)p + *p);
+    // if ((*next & 1) == 0) {
+    //     *p = *p + *next;
+    // }
 
     return;
 }
@@ -135,7 +143,7 @@ void* realloc(void* oldptr, size_t size)
         free(oldptr);
         return NULL;
     }
-    // if size is less than the old block then we will just be retuning the contents of the oldptr
+    // if size is less than the old block size then we will just be retuning the contents of the oldptr
     else if (size <= 16)
     {
         return oldptr;
