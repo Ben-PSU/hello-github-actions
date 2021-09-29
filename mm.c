@@ -66,7 +66,7 @@ struct header {
     size_t size;
     struct header *next_block;
     struct header *prev_block;
-}
+};
 
 /*
  * Initialize: returns false on error, true on success.
@@ -75,40 +75,39 @@ bool mm_init(void)
 {
     /* IMPLEMENT THIS */
     struct header *ptr = mem_sbrk(16);
-    ptr->next_block = p;
-    ptr->prev_block = p;
+    //size_t size = 16;
+    ptr->next_block = ptr;
+    ptr->prev_block = ptr;
     return true;
 }
 /*
-* Free block function obtained from slide 34 of Lectures 5+6
-*/
+ Free block function obtained from slide 34 of Lectures 5+6
+
 void free_block(size_t *p) {
     *p = *p & -2;
-    next = (size_t *) ((char *)p + *p);
+    (size_t *)next = (size_t *) ((char *)p + *p);
     if ((*next & 1) == 0) {
         *p = *p + *next;
     }
     return;
 }
-
+*/ 
 /*
  * malloc
  */
 void* malloc(size_t size)
 {
-
-    uint32_t *header = 1;
-    void *ptr 
-
-
     /* IMPLEMENT THIS */
+    //size_t new_size = align(size + 16);
     if (size == 0) {
         return NULL;
     }
-    size += sizeof(header);
+    /*
 
     *ptr = mem_sbrk(size);
     return *ptr;
+    */
+   return NULL;
 }
 
 /*
