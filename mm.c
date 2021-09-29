@@ -84,15 +84,16 @@ bool mm_init(void)
  */
 void* malloc(size_t size)
 {
+
+    uint32_t header = 1
+    uint32_t footer = 1
+    void *ptr 
+
     /* IMPLEMENT THIS */
     if (size == 0) {
         return NULL
     }
 
-    uint32_t header = 1
-    uint32_t footer = 1
-
-   
 
     size += sizeof(header)
     size += sizeof(footer)
@@ -100,12 +101,9 @@ void* malloc(size_t size)
      if (size + mem_brk > mem_max_addr) {
         return NULL
     }
+   
 
-    
-
-    
-
-    return NULL;
+    return ptr;
 }
 
 /*
