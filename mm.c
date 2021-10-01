@@ -1,11 +1,7 @@
 /*
  * mm.c
  *
-<<<<<<< HEAD
  * Name: Ryan Hayes and Ben Song
-=======
- * Name: Ben Song
->>>>>>> 24849b257f8206bc1111ff5b846167ba0b14836b
  *
  * NOTE TO STUDENTS: Replace this header comment with your own header
  * comment that gives a high level description of your solution.
