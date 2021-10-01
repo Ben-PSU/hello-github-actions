@@ -61,13 +61,14 @@ static size_t align(size_t x)
 }
 
 /* Global Variables */
-void* find_open_block(size_t size);
+void *find_open_block(size_t size);
 
 struct header {
     size_t size;
     struct header *next_block;
     struct header *prev_block;
 };
+typedef struct header block_header;
 
 /*
  * Initialize: returns false on error, true on success.
@@ -75,8 +76,10 @@ struct header {
 bool mm_init(void)
 {
     /* IMPLEMENT THIS */
-    struct header *ptr = mem_sbrk(16);
+    struct header *ptr = mem_sbrk(align(sizeof(block_header)));
     //size_t size = 16;
+    // this is arbritary right now we don't care about inital size 
+    ptr->size = 1;
     ptr->next_block = ptr;
     ptr->prev_block = ptr;
     return true;
@@ -87,33 +90,45 @@ bool mm_init(void)
  */
 void* malloc(size_t size)
 {
+    
     /* IMPLEMENT THIS */
+    
     if (size == 0) {
         return NULL;
     }
-    size_t new_size = align(size + 16);
-    struct header *ptr= find_open_block(new_size);
-    if ((long)ptr == -1) {
-        return NULL;
-    }
+    int new_size = align(size + align(sizeof(block_header)));
+    block_header *ptr = find_open_block(new_size);
+    if (ptr == NULL) {
+        ptr = mem_sbrk(new_size);
+        if ((long)ptr == -1) 
+            return NULL;
+        
+        else 
+            ptr->size = new_size | 1;
+        } 
     else {
-        *(size_t *)ptr = size;
-        return (void *)(ptr + 16);
+        ptr->size |= 1;
+        ptr->prev_block->next_block = ptr->next_block;
+        ptr->next_block->prev_block = ptr->prev_block;
     }
-   return NULL;
+    return (char *)ptr + align(sizeof(block_header));
 }
 
-void* find_open_block(size_t size) {
-    struct header *ptr = mem_heap_lo();
-    while(ptr != ((struct header *)mem_heap_lo())->next_block && ptr->size < size) {
-        ptr = ptr->next_block;
-    }
-    if (ptr != mem_heap_lo()) {
+// we start by looking at the first block. We always want a free block to basically have a free linked list
+void *find_open_block(size_t size) {
+    block_header *ptr;
+    // we say that our first block will always be the free, so we immediently go to next block 
+    for (ptr = ((block_header *)mem_heap_lo())->next_block; 
+    /* we now want to check the block size and make sure that the next block is large enough to hold our current size
+    and we need to check that we have not reached the end of out heap */
+        ptr != mem_heap_lo() && ptr->size < size; 
+        // if those conditions are not met we move to next block
+        ptr = ptr->next_block); 
+    // if ptr is not the first block then we have found a free block that is not the first block
+    if (ptr != mem_heap_lo()) 
         return ptr;
-    }
-    else {
+    else 
         return NULL;
-    }
 }
 
 /*
@@ -122,12 +137,19 @@ void* find_open_block(size_t size) {
 void free(void* ptr)
 {
     /* IMPLEMENT THIS */
-    // this should do nothing if ptr has a value of NULL
-    if (ptr == NULL) {
-        return;
+    if (ptr != NULL) {
+        /* we want the contents of the ptr without the header content and we also need a pointer to the 
+        head of the free list */
+        block_header *blockPtr = ptr - align(sizeof(block_header));
+        block_header *head = mem_heap_lo();
+        // *foot = mem_heap_hi(); eventually we will need to implement this  
+        // free up the block and change block pointers to point to the next free block 
+        blockPtr->size &= ~1;
+        blockPtr->next_block = head->next_block;
+        blockPtr->prev_block = head;
+        head->next_block = blockPtr;
+        blockPtr->next_block->prev_block = blockPtr;
     }
-
-
     return;
 }
 
