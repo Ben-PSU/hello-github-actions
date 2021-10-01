@@ -75,8 +75,10 @@ struct header {
 bool mm_init(void)
 {
     /* IMPLEMENT THIS */
-    struct header *ptr = mem_sbrk(16);
-    //size_t size = 16;
+    size_t size = sizeof(struct header);
+    struct header *ptr = mem_sbrk(align(size));
+    printf("%zu \n",size);
+    printf("%zu", ptr->size);
     ptr->next_block = ptr;
     ptr->prev_block = ptr;
     return true;
@@ -93,9 +95,8 @@ void* malloc(size_t size)
     if (size == 0) {
         return NULL;
     }
-    size_t new_size = align(size + 16);
+    size_t new_size = align(size + sizeof(struct header));
     struct header *ptr= find_open_block(new_size);
-    printf("Stuck");
 
     if ((long)ptr == -1) {
         return NULL;
@@ -107,14 +108,16 @@ void* malloc(size_t size)
 }
 
 void* find_open_block(size_t size) {
-    struct header *ptr = mem_heap_lo();
-    // This loop is not currently working because it is not effectively changing the value of the pointer. 
-    // Since the pointer is equal to mem_heap_lo, it is returning a NULL pointer which does not allow the execution of the else statement in malloc.
-    while(ptr != ((struct header *)mem_heap_lo())->next_block && ptr->size < size) {
-        ptr = ptr->next_block;
+    struct header *ptr;
+    // next block is not working, so the pointer is always equal to mem_heap_lo(). Thus, the else clause is executed and NULL is returned.
+    for (ptr = ((struct header *)mem_heap_lo())->next_block; ptr != ((struct header *)mem_heap_lo()) && ptr->size < size; ptr = ptr->next_block) {
+        printf("size: %zu \n",size);
+        printf("ptrsize: %zu \n",ptr->size);
+        printf("Blockheadersize: %zu \n", align(sizeof(struct header)));
     }
-
+    
     if (ptr != mem_heap_lo()) {
+        printf("Made it here");
         return ptr;
     }
     else {
