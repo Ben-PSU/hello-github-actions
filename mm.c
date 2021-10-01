@@ -1,11 +1,7 @@
 /*
  * mm.c
  *
-<<<<<<< HEAD
  * Name: Ryan Hayes and Ben Song
-=======
- * Name: Ben Song
->>>>>>> 24849b257f8206bc1111ff5b846167ba0b14836b
  *
  * NOTE TO STUDENTS: Replace this header comment with your own header
  * comment that gives a high level description of your solution.
@@ -68,6 +64,7 @@ struct header {
     struct header *next_block;
     struct header *prev_block;
 };
+typedef struct header block_header;
 
 /*
  * Initialize: returns false on error, true on success.
@@ -76,7 +73,7 @@ bool mm_init(void)
 {
     /* IMPLEMENT THIS */
     size_t size = sizeof(struct header);
-    struct header *ptr = mem_sbrk(align(size));
+    block_header *ptr = mem_sbrk(align(size));
     printf("%zu \n",size);
     printf("%zu", ptr->size);
     ptr->next_block = ptr;
@@ -96,7 +93,7 @@ void* malloc(size_t size)
         return NULL;
     }
     size_t new_size = align(size + sizeof(struct header));
-    struct header *ptr= find_open_block(new_size);
+    block_header *ptr= find_open_block(new_size);
 
     if ((long)ptr == -1) {
         return NULL;
@@ -108,12 +105,12 @@ void* malloc(size_t size)
 }
 
 void* find_open_block(size_t size) {
-    struct header *ptr;
+    block_header *ptr;
     // next block is not working, so the pointer is always equal to mem_heap_lo(). Thus, the else clause is executed and NULL is returned.
-    for (ptr = ((struct header *)mem_heap_lo())->next_block; ptr != ((struct header *)mem_heap_lo()) && ptr->size < size; ptr = ptr->next_block) {
+    for (ptr = ((block_header *)mem_heap_lo())->next_block; ptr != ((block_header *)mem_heap_lo()) && ptr->size < size; ptr = ptr->next_block) {
         printf("size: %zu \n",size);
         printf("ptrsize: %zu \n",ptr->size);
-        printf("Blockheadersize: %zu \n", align(sizeof(struct header)));
+        printf("Blockheadersize: %zu \n", align(sizeof(block_header)));
     }
     
     if (ptr != mem_heap_lo()) {
@@ -131,12 +128,19 @@ void* find_open_block(size_t size) {
 void free(void* ptr)
 {
     /* IMPLEMENT THIS */
-    // this should do nothing if ptr has a value of NULL
-    if (ptr == NULL) {
-        return;
+    if (ptr != NULL) {
+        /* we want the contents of the ptr without the header content and we also need a pointer to the 
+        head of the free list */
+        block_header *blockPtr = ptr - align(sizeof(block_header));
+        block_header *head = mem_heap_lo();
+        // *foot = mem_heap_hi(); eventually we will need to implement this  
+        // free up the block and change block pointers to point to the next free block 
+        blockPtr->size &= ~1;
+        blockPtr->next_block = head->next_block;
+        blockPtr->prev_block = head;
+        head->next_block = blockPtr;
+        blockPtr->next_block->prev_block = blockPtr;
     }
-
-
     return;
 }
 
