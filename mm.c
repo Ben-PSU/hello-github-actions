@@ -1,7 +1,11 @@
 /*
  * mm.c
  *
+<<<<<<< HEAD
  * Name: Ryan Hayes and Ben Song
+=======
+ * Name: Ben Song
+>>>>>>> 24849b257f8206bc1111ff5b846167ba0b14836b
  *
  * NOTE TO STUDENTS: Replace this header comment with your own header
  * comment that gives a high level description of your solution.
@@ -57,7 +61,7 @@ static size_t align(size_t x)
 }
 
 /* Global Variables */
-void* find_open_block(size_t size);
+void *find_open_block(size_t size);
 
 struct header {
     size_t size;
@@ -72,6 +76,7 @@ typedef struct header block_header;
 bool mm_init(void)
 {
     /* IMPLEMENT THIS */
+<<<<<<< HEAD
 
     size_t size = align(sizeof(block_header));
     block_header *dummy_header = mem_sbrk(size);
@@ -84,6 +89,14 @@ bool mm_init(void)
     header->next_block = header;
     header->prev_block = header;
     
+=======
+    struct header *ptr = mem_sbrk(align(sizeof(block_header)));
+    //size_t size = 16;
+    // this is arbritary right now we don't care about inital size 
+    ptr->size = 1;
+    ptr->next_block = ptr;
+    ptr->prev_block = ptr;
+>>>>>>> 749fcf29c6cc6c4caa2559a28f2b84f41d8d0df0
     return true;
 }
 
@@ -98,15 +111,30 @@ void* malloc(size_t size)
     if (size == 0) {
         return NULL;
     }
+<<<<<<< HEAD
     size_t new_size = align(size + sizeof(struct header));
     block_header *ptr= find_open_block(new_size);
     if ((long)ptr == -1) {
         return NULL;
     }
+=======
+    int new_size = align(size + align(sizeof(block_header)));
+    block_header *ptr = find_open_block(new_size);
+    if (ptr == NULL) {
+        ptr = mem_sbrk(new_size);
+        if ((long)ptr == -1) 
+            return NULL;
+        
+        else 
+            ptr->size = new_size | 1;
+        } 
+>>>>>>> 749fcf29c6cc6c4caa2559a28f2b84f41d8d0df0
     else {
-        *(size_t *)ptr = size;
-        return (void *)(ptr + 16);
+        ptr->size |= 1;
+        ptr->prev_block->next_block = ptr->next_block;
+        ptr->next_block->prev_block = ptr->prev_block;
     }
+<<<<<<< HEAD
     return NULL;
 }
 
@@ -124,11 +152,26 @@ void* find_open_block(size_t size) {
     
     if (ptr != mem_heap_lo()) {
         printf("Made it here\n");
+=======
+    return (char *)ptr + align(sizeof(block_header));
+}
+
+// we start by looking at the first block. We always want a free block to basically have a free linked list
+void *find_open_block(size_t size) {
+    block_header *ptr;
+    // we say that our first block will always be the free, so we immediently go to next block 
+    for (ptr = ((block_header *)mem_heap_lo())->next_block; 
+    /* we now want to check the block size and make sure that the next block is large enough to hold our current size
+    and we need to check that we have not reached the end of out heap */
+        ptr != mem_heap_lo() && ptr->size < size; 
+        // if those conditions are not met we move to next block
+        ptr = ptr->next_block); 
+    // if ptr is not the first block then we have found a free block that is not the first block
+    if (ptr != mem_heap_lo()) 
+>>>>>>> 749fcf29c6cc6c4caa2559a28f2b84f41d8d0df0
         return ptr;
-    }
-    else {
+    else 
         return NULL;
-    }
 }
 
 /*
