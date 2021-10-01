@@ -1,7 +1,11 @@
 /*
  * mm.c
  *
+<<<<<<< HEAD
  * Name: Ryan Hayes and Ben Song
+=======
+ * Name: Ben Song
+>>>>>>> 24849b257f8206bc1111ff5b846167ba0b14836b
  *
  * NOTE TO STUDENTS: Replace this header comment with your own header
  * comment that gives a high level description of your solution.
@@ -57,7 +61,7 @@ static size_t align(size_t x)
 }
 
 /* Global Variables */
-void* find_open_block(size_t size);
+void *find_open_block(size_t size);
 
 struct header {
     size_t size;
@@ -74,6 +78,8 @@ bool mm_init(void)
     /* IMPLEMENT THIS */
     struct header *ptr = mem_sbrk(align(sizeof(block_header)));
     //size_t size = 16;
+    // this is arbritary right now we don't care about inital size 
+    ptr->size = 1;
     ptr->next_block = ptr;
     ptr->prev_block = ptr;
     return true;
@@ -90,33 +96,39 @@ void* malloc(size_t size)
     if (size == 0) {
         return NULL;
     }
-    size_t new_size = align(size + 16);
-    struct header *ptr= find_open_block(new_size);
-    printf("Stuck");
-
-    if ((long)ptr == -1) {
-        return NULL;
-    }
+    int new_size = align(size + align(sizeof(block_header)));
+    block_header *ptr = find_open_block(new_size);
+    if (ptr == NULL) {
+        ptr = mem_sbrk(new_size);
+        if ((long)ptr == -1) 
+            return NULL;
+        
+        else 
+            ptr->size = new_size | 1;
+        } 
     else {
-        *(size_t *)ptr = size;
-        return (void *)(ptr + 16);
+        ptr->size |= 1;
+        ptr->prev_block->next_block = ptr->next_block;
+        ptr->next_block->prev_block = ptr->prev_block;
     }
+    return (char *)ptr + align(sizeof(block_header));
 }
 
-void* find_open_block(size_t size) {
-    struct header *ptr = mem_heap_lo();
-    // This loop is not currently working because it is not effectively changing the value of the pointer. 
-    // Since the pointer is equal to mem_heap_lo, it is returning a NULL pointer which does not allow the execution of the else statement in malloc.
-    while(ptr != ((struct header *)mem_heap_lo())->next_block && ptr->size < size) {
-        ptr = ptr->next_block;
-    }
-
-    if (ptr != mem_heap_lo()) {
+// we start by looking at the first block. We always want a free block to basically have a free linked list
+void *find_open_block(size_t size) {
+    block_header *ptr;
+    // we say that our first block will always be the free, so we immediently go to next block 
+    for (ptr = ((block_header *)mem_heap_lo())->next_block; 
+    /* we now want to check the block size and make sure that the next block is large enough to hold our current size
+    and we need to check that we have not reached the end of out heap */
+        ptr != mem_heap_lo() && ptr->size < size; 
+        // if those conditions are not met we move to next block
+        ptr = ptr->next_block); 
+    // if ptr is not the first block then we have found a free block that is not the first block
+    if (ptr != mem_heap_lo()) 
         return ptr;
-    }
-    else {
+    else 
         return NULL;
-    }
 }
 
 /*
