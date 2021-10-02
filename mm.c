@@ -76,12 +76,20 @@ typedef struct header block_header;
 bool mm_init(void)
 {
     /* IMPLEMENT THIS */
+    //block_header *header = (block_header *)mem_heap_lo();
     struct header *ptr = mem_sbrk(align(sizeof(block_header)));
+    //block_header *footer = (block_header *)mem_heap_hi();
     //size_t size = 16;
     // this is arbritary right now we don't care about inital size 
+    //header->size = align(sizeof(block_header));
+    //header->next_block = ptr;
+    //header->prev_block = NULL;
     ptr->size = 1;
     ptr->next_block = ptr;
     ptr->prev_block = ptr;
+    //footer->size = align(sizeof(block_header));
+    //footer->next_block = NULL;
+    //footer->prev_block = ptr;
     return true;
 }
 
@@ -98,13 +106,14 @@ void* malloc(size_t size)
     }
     int new_size = align(size + align(sizeof(block_header)));
     block_header *ptr = find_open_block(new_size);
+    
     if (ptr == NULL) {
         ptr = mem_sbrk(new_size);
-        if ((long)ptr == -1) 
-            return NULL;
+        if ((long)ptr == -1) {
+            return NULL; }
         
-        else 
-            ptr->size = new_size | 1;
+        else  {
+            ptr->size = new_size | 1;}
         } 
     else {
         ptr->size |= 1;
@@ -123,7 +132,8 @@ void *find_open_block(size_t size) {
     and we need to check that we have not reached the end of out heap */
         ptr != mem_heap_lo() && ptr->size < size; 
         // if those conditions are not met we move to next block
-        ptr = ptr->next_block); 
+        ptr = ptr->next_block);
+        
     // if ptr is not the first block then we have found a free block that is not the first block
     if (ptr != mem_heap_lo()) 
         return ptr;
@@ -158,31 +168,23 @@ void free(void* ptr)
  */
 void* realloc(void* oldptr, size_t size)
 {
-    // when oldptr is null, it is equivalent to malloc(size)
-    if (oldptr == NULL) {
-        return malloc(size);
-    }
-    // when size is 0, it is equivalent to free(oldptr)
-    else if (size == 0) {
-        free(oldptr);
+    // We initialize a pointer as the pointer that needs to be reallocated without the header
+    block_header *block_ptr = oldptr - sizeof(block_header);
+    // We create a new pointer which will be returned. This is the proper size. If malloc does not work here, we return NULL.
+    void *ptr = malloc(size);
+    if (ptr == NULL) {
         return NULL;
     }
-    // if size is less than the old block then we will just be retuning the contents of the oldptr
-    else if (size <= 16)
-    {
-        return oldptr;
+    // We initialize a new variable that is the size of the data that we need to reallocate.
+    size_t copySize = block_ptr->size-sizeof(block_header);
+    // If the size we are hoping to reallocte is less than this, then we reduce the size that we are copying to the new reallocated size.
+    if (align(size) < copySize) {
+        copySize = align(size);
     }
-    /* when oldptr is not null and the size is greater than the block size we 
-    initilize a new ptr that will have a block size of size and we then copy the contents
-    of the oldptr into the new ptr and return the new ptr*/
-    else {
-        void *ptr = malloc(size);
-        if (ptr != NULL) {
-            mem_memcpy(ptr, oldptr, 16);
-            free(ptr);
-        }
-        return ptr;
-    }
+    // We copy the data that we are able to fit into the pointer that we allocated earlier.  We then free up the pointer that was passed in. Return the new pointer.
+    mem_memcpy(ptr, oldptr, copySize);
+    mm_free(oldptr);
+    return ptr;
 }
 
 /*
