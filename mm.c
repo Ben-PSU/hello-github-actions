@@ -72,20 +72,11 @@ typedef struct header block_header;
 bool mm_init(void)
 {
     /* IMPLEMENT THIS */
-    //block_header *header = (block_header *)mem_heap_lo();
     struct header *ptr = mem_sbrk(align(sizeof(block_header)));
-    //block_header *footer = (block_header *)mem_heap_hi();
-    //size_t size = 16;
     // this is arbritary right now we don't care about inital size 
-    //header->size = align(sizeof(block_header));
-    //header->next_block = ptr;
-    //header->prev_block = NULL;
     ptr->size = 1;
     ptr->next_block = ptr;
     ptr->prev_block = ptr;
-    //footer->size = align(sizeof(block_header));
-    //footer->next_block = NULL;
-    //footer->prev_block = ptr;
     return true;
 }
 
