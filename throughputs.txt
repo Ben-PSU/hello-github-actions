@@ -1,2 +1,3 @@
 Intel(R)Xeon(R)CPUE5-1620v3@3.50GHz:regular:20092
 Intel(R)Core(TM)i5-8250UCPU@1.60GHz:regular:17026
+11thGenIntel(R)Core(TM)i7-11700K@3.60GHz:regular:31987
