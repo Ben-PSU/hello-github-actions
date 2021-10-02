@@ -76,20 +76,11 @@ typedef struct header block_header;
 bool mm_init(void)
 {
     /* IMPLEMENT THIS */
-    //block_header *header = (block_header *)mem_heap_lo();
     struct header *ptr = mem_sbrk(align(sizeof(block_header)));
-    //block_header *footer = (block_header *)mem_heap_hi();
-    //size_t size = 16;
     // this is arbritary right now we don't care about inital size 
-    //header->size = align(sizeof(block_header));
-    //header->next_block = ptr;
-    //header->prev_block = NULL;
     ptr->size = 1;
     ptr->next_block = ptr;
     ptr->prev_block = ptr;
-    //footer->size = align(sizeof(block_header));
-    //footer->next_block = NULL;
-    //footer->prev_block = ptr;
     return true;
 }
 
@@ -98,22 +89,16 @@ bool mm_init(void)
  */
 void* malloc(size_t size)
 {
-    
     /* IMPLEMENT THIS */
-    
     if (size == 0) {
         return NULL;
     }
     int new_size = align(size + align(sizeof(block_header)));
-    block_header *ptr = find_open_block(new_size);
+    block_header *ptr = find_open_block(align(new_size));
     
     if (ptr == NULL) {
         ptr = mem_sbrk(new_size);
-        if ((long)ptr == -1) {
-            return NULL; }
-        
-        else  {
-            ptr->size = new_size | 1;}
+        ptr->size = new_size | 1;
         } 
     else {
         ptr->size |= 1;
@@ -134,6 +119,7 @@ void *find_open_block(size_t size) {
         // if those conditions are not met we move to next block
         ptr = ptr->next_block);
         
+    //ptr = mem_sbrk(size);
     // if ptr is not the first block then we have found a free block that is not the first block
     if (ptr != mem_heap_lo()) 
         return ptr;
