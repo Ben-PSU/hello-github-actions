@@ -106,7 +106,7 @@ void* malloc(size_t size)
 {
 
     /* IMPLEMENT THIS */
-    // nothing to allocate if size is zero
+    // nothing to allocate if size is zero.
     if (size == 0) {
         return NULL;
     }
