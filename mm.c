@@ -9,6 +9,7 @@
  * While our code is functional for all but one of the traces, we will need to reorganize some of the code to succeed on the final submission.
  * One of our ideas is to implement a linked list of free blocks as opposed to a linked list of all the blocks as we have it set up now.  
  * We also will need to add a footer to our blocks to allow for coalescing while freeing.  
+ * 
  * Here is a rundown of the functions we have implemented now:
  * mm_init() - Initializes a block_header pointer at the first available space is memory using the function m_sbrk. The size of this header is set to 1 to represent its
  * allocation and the next and previous are set to itself.
@@ -18,7 +19,7 @@
  * returned as NULL, mem_sbrk is called on the new size and allocates additional space for the pointer.  
  * We return the pointer + sizeof(block_header) so the next available space in memory is after the header of the next block.  
  * 
- * free(ptr) - Takes in a pointer and uses linked list arithmetic to eliminate this block from memory.
+ * free(ptr) - Takes in a pointer and uses linked list arithmetic to deallocate this block from memory.
  * 
  * realloc(oldptr, size) - Takes in a pointer and size and allocates space for a new pointer of size size.  This function uses malloc and free to allocate 
  * enough space for a new pointer of size size and free of the space taken up by oldptr.  The data that was contained in oldptr gets copied to the new
