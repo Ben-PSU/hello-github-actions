@@ -1,11 +1,7 @@
 /*
  * mm.c
  *
-<<<<<<< HEAD
  * Name: Ryan Hayes and Ben Song
-=======
- * Name: Ben Song
->>>>>>> 24849b257f8206bc1111ff5b846167ba0b14836b
  *
  * NOTE TO STUDENTS: Replace this header comment with your own header
  * comment that gives a high level description of your solution.
@@ -100,45 +96,46 @@ void* malloc(size_t size)
 {
 
     /* IMPLEMENT THIS */
-    
+    // nothing to allocate if size is zero
     if (size == 0) {
         return NULL;
     }
+    // we set the new size to also include the header size then we call helper fuction to find a free block
     int new_size = align(size + align(sizeof(block_header)));
     block_header *ptr = find_open_block(new_size);
-    
+    // if the helper fuction could not find a open block we use mem_sbrk to extend heap to get enough space to have a block big enough 
+    // we then set the block to be allocated
     if (ptr == NULL) {
         ptr = mem_sbrk(new_size);
-        if ((long)ptr == -1) {
-            return NULL; }
-        
-        else  {
-            ptr->size = new_size | 1;}
+        ptr->size = new_size | 1;
         } 
+    // if find_open_block finds a free block that is big enough then we set that block to be allocated and now that this block is 
+    // allocated we need to update the blocks surrounding it so they no longer point to the allocated block  
     else {
         ptr->size |= 1;
-        ptr->prev_block->next_block = ptr->next_block;
         ptr->next_block->prev_block = ptr->prev_block;
+        ptr->prev_block->next_block = ptr->next_block;
     }
+    // we return the ptr which now points to the next block in the heap
     return (char *)ptr + align(sizeof(block_header));
 }
 
 // we start by looking at the first block. We always want a free block to basically have a free linked list
 void *find_open_block(size_t size) {
     block_header *ptr;
-    // we say that our first block will always be the free, so we immediently go to next block 
-    for (ptr = ((block_header *)mem_heap_lo())->next_block; 
-    /* we now want to check the block size and make sure that the next block is large enough to hold our current size
-    and we need to check that we have not reached the end of out heap */
-        ptr != mem_heap_lo() && ptr->size < size; 
-        // if those conditions are not met we move to next block
-        ptr = ptr->next_block);
-        
-    // if ptr is not the first block then we have found a free block that is not the first block
-    if (ptr != mem_heap_lo()) 
+ /* we say that our first block will always be the free, so we immediently go to next block 
+    we now want to check the block size and make sure that the next block is large enough to hold our current size
+    and we need to check that we have not reached the end of out heap if those conditions are not met we move to next block*/
+    for (ptr = ((block_header *)mem_heap_lo())->next_block; ptr != mem_heap_lo() && ptr->size < size;  ptr = ptr->next_block) {
+    }
+    // if ptr is not the first block then we have found a free block and we return ptr 
+    if (ptr != mem_heap_lo()) {
         return ptr;
-    else 
+    }
+     // if we do not find a free block and will return NULL
+    else {
         return NULL;
+    }
 }
 
 /*
