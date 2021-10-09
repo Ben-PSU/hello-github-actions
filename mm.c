@@ -165,11 +165,12 @@ void free(void* ptr)
     if (ptr != NULL) {
         /* we want the contents of the ptr without the header content and we also need a pointer to the 
         head of the free list */
-        block_header *blockPtr = ptr - align(sizeof(block_header));
-        block_header *head = mem_heap_lo();
+        payload *blockPtr = ptr - align(sizeof(block_header));
+        block_header *header = ptr;
+        payload *head = mem_heap_lo();
         // *foot = mem_heap_hi(); eventually we will need to implement this  
         // free up the block and change block pointers to point to the next free block 
-        blockPtr->size &= ~1;
+        header->size &= ~1;
         blockPtr->next_block = head->next_block;
         blockPtr->prev_block = head;
         head->next_block = blockPtr;
