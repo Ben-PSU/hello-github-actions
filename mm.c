@@ -83,7 +83,15 @@ struct header {
     struct header *next_block;
     struct header *prev_block;
 };
+
+struct payload {
+    struct payload *next_block;
+    struct payload *prev_block;
+};
+
 typedef struct header block_header;
+typedef struct payload payload;
+
 
 /*
  * Initialize: returns false on error, true on success.
@@ -94,8 +102,6 @@ bool mm_init(void)
     struct header *ptr = mem_sbrk(align(sizeof(block_header)));
     // this is arbritary right now we don't care about inital size 
     ptr->size = 1;
-    ptr->next_block = ptr;
-    ptr->prev_block = ptr;
     return true;
 }
 
@@ -108,15 +114,16 @@ void* malloc(size_t size)
     if (size == 0) {
         return NULL;
     }
-    int new_size = align(size + align(sizeof(block_header)));
-    block_header *ptr = find_open_block(align(new_size));
+    int new_size = align(size);
+    block_header *head = mem_sbrk(sizeof(block_header));
+    payload *ptr = find_open_block(align(new_size));
     
     if (ptr == NULL) {
         ptr = mem_sbrk(new_size);
-        ptr->size = new_size | 1;
+        head->size = new_size | 1;
         } 
     else {
-        ptr->size |= 1;
+        head->size | 1;
         ptr->prev_block->next_block = ptr->next_block;
         ptr->next_block->prev_block = ptr->prev_block;
     }
@@ -125,21 +132,22 @@ void* malloc(size_t size)
 
 // we start by looking at the first block. We always want a free block to basically have a free linked list
 void *find_open_block(size_t size) {
-    block_header *ptr;
-    // we say that our first block will always be the free, so we immediently go to next block 
-    for (ptr = ((block_header *)mem_heap_lo())->next_block; 
-    /* we now want to check the block size and make sure that the next block is large enough to hold our current size
-    and we need to check that we have not reached the end of out heap */
-        ptr != mem_heap_lo() && ptr->size < size; 
-        // if those conditions are not met we move to next block
-        ptr = ptr->next_block);
-        
-    //ptr = mem_sbrk(size);
-    // if ptr is not the first block then we have found a free block that is not the first block
-    if (ptr != mem_heap_lo()) 
+    block_header *head;
+    payload *ptr;
+ /* we say that our first block will always be the free, so we immediently go to next block 
+    we now want to check the block size and make sure that the next block is large enough to hold our current size
+    and we need to check that we have not reached the end of out heap if those conditions are not met we move to next block*/
+    for (ptr = ((payload *)mem_heap_lo())->next_block; ptr != mem_heap_lo() && head->size < size;  ptr = ptr->next_block) {
+
+    }
+    // if ptr is not the first block then we have found a free block and we return ptr 
+    if (ptr != mem_heap_lo()) {
         return ptr;
-    else 
+    }
+     // if we do not find a free block and will return NULL
+    else {
         return NULL;
+    }
 }
 
 /*
