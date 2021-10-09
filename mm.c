@@ -83,7 +83,15 @@ struct header {
     struct header *next_block;
     struct header *prev_block;
 };
+
+struct payload {
+    struct payload *next_block;
+    struct payload *prev_block;
+};
+
 typedef struct header block_header;
+typedef struct payload payload;
+
 
 /*
  * Initialize: returns false on error, true on success.
@@ -94,8 +102,6 @@ bool mm_init(void)
     struct header *ptr = mem_sbrk(align(sizeof(block_header)));
     // this is arbritary right now we don't care about inital size 
     ptr->size = 1;
-    ptr->next_block = ptr;
-    ptr->prev_block = ptr;
     return true;
 }
 
@@ -110,19 +116,19 @@ void* malloc(size_t size)
     if (size == 0) {
         return NULL;
     }
-    // we set the new size to also include the header size then we call helper fuction to find a free block
-    int new_size = align(size + align(sizeof(block_header)));
-    block_header *ptr = find_open_block(new_size);
-    // if the helper fuction could not find a open block we use mem_sbrk to extend heap to get enough space to have a block big enough 
-    // we then set the block to be allocated
+    int new_size = align(size);
+    block_header *head = mem_sbrk(sizeof(block_header));
+    payload *ptr = find_open_block(align(new_size));
+    
     if (ptr == NULL) {
         ptr = mem_sbrk(new_size);
-        ptr->size = new_size | 1;
+        head->size = new_size | 1;
         } 
     // if find_open_block finds a free block that is big enough then we set that block to be allocated and now that this block is 
     // allocated we need to update the blocks surrounding it so they no longer point to the allocated block  
     else {
-        ptr->size |= 1;
+        head->size | 1;
+        ptr->prev_block->next_block = ptr->next_block;
         ptr->next_block->prev_block = ptr->prev_block;
         ptr->prev_block->next_block = ptr->next_block;
     }
@@ -132,11 +138,13 @@ void* malloc(size_t size)
 
 // we start by looking at the first block. We always want a free block to basically have a free linked list
 void *find_open_block(size_t size) {
-    block_header *ptr;
+    block_header *head;
+    payload *ptr;
  /* we say that our first block will always be the free, so we immediently go to next block 
     we now want to check the block size and make sure that the next block is large enough to hold our current size
     and we need to check that we have not reached the end of out heap if those conditions are not met we move to next block*/
-    for (ptr = ((block_header *)mem_heap_lo())->next_block; ptr != mem_heap_lo() && ptr->size < size;  ptr = ptr->next_block) {
+    for (ptr = ((payload *)mem_heap_lo())->next_block; ptr != mem_heap_lo() && head->size < size;  ptr = ptr->next_block) {
+
     }
     // if ptr is not the first block then we have found a free block and we return ptr 
     if (ptr != mem_heap_lo()) {
